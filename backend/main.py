@@ -14,11 +14,12 @@ def create_book():
     author_name = request.json.get("authorName")
     image_url = request.json.get("imageUrl")  
     genre = request.json.get("genre")
+    status = request.json.get("status")  # Added line
 
-    if not title or not author_name:
-        return jsonify({"message": "You must include both title and author name"}), 400
+    if not title or not author_name or not status:  # Updated condition to include status
+        return jsonify({"message": "You must include title, author name, and status"}), 400
 
-    new_book = Book(title=title, author_name=author_name, image_url=image_url, genre=genre)
+    new_book = Book(title=title, author_name=author_name, image_url=image_url, genre=genre, status=status)  # Updated line
     try:
         db.session.add(new_book)
         db.session.commit()
@@ -39,8 +40,12 @@ def update_book(book_id):
     book.author_name = data.get("authorName", book.author_name)
     book.image_url = data.get("imageUrl", book.image_url)
     book.genre = data.get("genre", book.genre)
+    book.status = data.get("status", book.status)  # Added line
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
 
     return jsonify({"message": "Book updated."}), 200
 
